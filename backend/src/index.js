@@ -20,15 +20,24 @@ app.use(express.json({ limit: "20mb" }));           // Accept bigger payloads
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(cookieParser());
 
-// Only use CORS in dev
-if (process.env.NODE_ENV !== "production") {
-  app.use(
-    cors({
-      origin: "http://localhost:5173",
-      credentials: true,
-    })
-  );
-}
+// Configure CORS to accept requests from the frontend (supports comma-separated env)
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((s) => s.trim());
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
