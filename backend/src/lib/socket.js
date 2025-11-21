@@ -20,6 +20,8 @@ const io = new Server(server, {
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
   },
 });
 
