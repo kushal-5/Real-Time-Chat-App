@@ -36,6 +36,10 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data });
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+      }
       toast.success("Account created successfully");
       get().connectSocket();
     } catch (error) {
@@ -50,6 +54,10 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+      }
       toast.success("Logged in successfully");
 
       get().connectSocket();
@@ -64,6 +72,8 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axiosInstance.post("/auth/logout");
       set({ authUser: null });
+      localStorage.removeItem("token");
+      delete axiosInstance.defaults.headers.common["Authorization"];
       toast.success("Logged out successfully");
       get().disconnectSocket();
     } catch (error) {
@@ -90,6 +100,9 @@ export const useAuthStore = create((set, get) => ({
     if (!authUser || get().socket?.connected) return;
 
     const socket = io(BASE_URL, {
+      auth: {
+        token: localStorage.getItem("token") || null,
+      },
       query: {
         userId: authUser._id,
       },

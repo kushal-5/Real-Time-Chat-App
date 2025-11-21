@@ -9,3 +9,10 @@ export const axiosInstance = axios.create({
   baseURL: `${backend}/api`,
   withCredentials: true,
 });
+
+// If a token exists in localStorage, set Authorization header so requests work
+// on clients where cookies may be blocked.
+const savedToken = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+if (savedToken) {
+  axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
+}

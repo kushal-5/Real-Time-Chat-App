@@ -39,14 +39,6 @@ app.use(
   })
 );
 
-// TEMPORARY DEBUG: log incoming Origin header for troubleshooting CORS in production
-app.use((req, res, next) => {
-  try {
-    console.log("[CORS DEBUG] Request URL:", req.originalUrl, "Origin:", req.headers.origin);
-  } catch (e) {}
-  next();
-});
-
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
